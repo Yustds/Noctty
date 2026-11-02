@@ -1,0 +1,31 @@
+/* Scrollbar general (Webkit) */
+.custom-scrollbar::-webkit-scrollbar { width: 6px; height: 6px; }
+.custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
+.custom-scrollbar::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
+.dark .custom-scrollbar::-webkit-scrollbar-thumb { background: #475569; }
+
+/* Ocultar scroll horizontal en móviles para los filtros */
+@media (max-width: 768px) {
+    .hide-scroll-mobile::-webkit-scrollbar { display: none; }
+    .hide-scroll-mobile { -ms-overflow-style: none; scrollbar-width: none; }
+}
+
+/* Efectos para el editor Notion-like */
+[contenteditable]:empty:before {
+    content: attr(placeholder);
+    color: #94a3b8;
+    pointer-events: none;
+    display: block; 
+}
+.dark [contenteditable]:empty:before { color: #475569; }
+
+/* Drag handle visible on hover and active */
+.block-container:hover .drag-handle, 
+.block-container:focus-within .drag-handle { opacity: 1 !important; }
+
+/* Evitar outline azul feo en móviles al hacer tap */
+* { -webkit-tap-highlight-color: transparent; }
+
+/* Ajustes de iframe para YouTube (Responsive) */
+.youtube-container { position: relative; width: 100%; padding-bottom: 56.25%; height: 0; }
+.youtube-container iframe { position: absolute; top: 0; left: 0; width: 100%; height: 100%; border-radius: 0.75rem; }

@@ -1,0 +1,330 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Noctty - MVP Pro</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = { darkMode: 'class' } 
+    </script>
+    <!-- Iconos y PDF -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body class="bg-gray-50 dark:bg-gray-900 text-gray-800 dark:text-gray-200 h-screen flex overflow-hidden antialiased transition-colors duration-300">
+
+    <!-- PANTALLA DE LOGIN Y REGISTRO -->
+    <div id="view-login" class="w-full h-full flex items-center justify-center bg-gray-50 dark:bg-gray-900 z-50 absolute inset-0 transition-opacity duration-500">
+        <div class="bg-white dark:bg-gray-800 p-8 md:p-10 rounded-3xl shadow-2xl w-[90%] max-w-md border border-gray-100 dark:border-gray-700 transform transition-transform scale-100 animate-fade-in">
+            <div class="text-center mb-6">
+                <h1 class="text-3xl font-extrabold tracking-widest text-blue-600 dark:text-blue-400 mb-2">NOCTTY.</h1>
+                <p class="text-sm text-gray-500 dark:text-gray-400">Entorno web de anotaciones estudiantiles</p>
+            </div>
+
+            <!-- Pestañas Login / Registro -->
+            <div class="flex border-b border-gray-200 dark:border-gray-700 mb-6">
+                <button onclick="toggleAuthTab('login')" id="tab-btn-login" class="w-1/2 py-2 font-bold text-sm border-b-2 border-blue-600 text-blue-600 dark:text-blue-400 transition">Iniciar Sesión</button>
+                <button onclick="toggleAuthTab('register')" id="tab-btn-register" class="w-1/2 py-2 font-bold text-sm border-b-2 border-transparent text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 transition">Registrarse</button>
+            </div>
+
+            <!-- Formulario Iniciar Sesión -->
+            <form id="form-login" onsubmit="handleLogin(event)" class="space-y-4">
+                <div>
+                    <label class="block text-xs font-semibold text-gray-500 uppercase mb-1">Correo Institucional</label>
+                    <input type="email" id="login-email" value="estudiante@unipamplona.edu.co" class="w-full bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-xl px-4 py-3 outline-none focus:ring-2 focus:ring-blue-500 transition dark:text-white" required>
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-gray-500 uppercase mb-1">Contraseña</label>
+                    <input type="password" id="login-pwd" value="123456" class="w-full bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-xl px-4 py-3 outline-none focus:ring-2 focus:ring-blue-500 transition dark:text-white" required>
+                </div>
+                <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 rounded-xl shadow-lg transition mt-4">Entrar a Noctty</button>
+            </form>
+
+            <!-- Formulario Registrar Nuevo Usuario -->
+            <form id="form-register" onsubmit="handleRegister(event)" class="space-y-4 hidden">
+                <div>
+                    <label class="block text-xs font-semibold text-gray-500 uppercase mb-1">Nombre Completo</label>
+                    <input type="text" id="reg-name" placeholder="Ej. Carlos Pérez" class="w-full bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-xl px-4 py-3 outline-none focus:ring-2 focus:ring-blue-500 transition dark:text-white" required>
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-gray-500 uppercase mb-1">Correo Institucional</label>
+                    <input type="email" id="reg-email" placeholder="usuario@unipamplona.edu.co" class="w-full bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-xl px-4 py-3 outline-none focus:ring-2 focus:ring-blue-500 transition dark:text-white" required>
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-gray-500 uppercase mb-1">Contraseña</label>
+                    <input type="password" id="reg-pwd" placeholder="••••••••" class="w-full bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-xl px-4 py-3 outline-none focus:ring-2 focus:ring-blue-500 transition dark:text-white" required>
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-gray-500 uppercase mb-1">Confirmar Contraseña</label>
+                    <input type="password" id="reg-pwd-confirm" placeholder="••••••••" class="w-full bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-xl px-4 py-3 outline-none focus:ring-2 focus:ring-blue-500 transition dark:text-white" required>
+                </div>
+                <button type="submit" class="w-full bg-green-600 hover:bg-green-700 text-white font-bold py-3 rounded-xl shadow-lg transition mt-4">Crear Cuenta</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- ESTRUCTURA PRINCIPAL DEL APP -->
+    <div id="app-layout" class="w-full h-full flex hidden opacity-0 transition-opacity duration-500 relative">
+        
+        <!-- SIDEBAR -->
+        <aside id="main-sidebar" class="w-64 bg-[#1e1e24] text-gray-300 flex flex-col transition-all duration-300 border-r border-gray-800 z-30 shadow-2xl absolute md:relative h-full transform -translate-x-full md:translate-x-0 flex-shrink-0">
+            <div onclick="toggleModal('profile-modal')" class="p-4 hover:bg-white/5 cursor-pointer flex items-center justify-between group transition border-b border-gray-800">
+                <div class="flex items-center gap-3 w-full">
+                    <img id="sidebar-avatar" src="" alt="Avatar" class="w-9 h-9 rounded-full object-cover bg-gray-700 shadow-lg hidden">
+                    <div id="sidebar-avatar-fallback" class="w-9 h-9 rounded-full bg-gradient-to-tr from-blue-600 to-purple-600 flex items-center justify-center text-white font-bold text-xs shadow-lg">JS</div>
+                    <div class="overflow-hidden flex-1">
+                        <p class="text-sm font-semibold text-gray-100 truncate" id="user-name-display">Juan Diego S.</p>
+                        <p class="text-xs text-gray-500 truncate group-hover:text-gray-400 transition">Editar perfil</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="px-4 py-3">
+                <button onclick="toggleModal('search-modal')" class="w-full bg-white/5 hover:bg-white/10 text-gray-400 text-sm py-2 px-3 rounded-lg flex items-center justify-between transition border border-white/5">
+                    <div class="flex items-center gap-2"><i data-lucide="search" class="w-4 h-4"></i> Buscar...</div>
+                    <span class="text-[10px] bg-white/10 px-1.5 py-0.5 rounded border border-white/10 hidden md:inline">Cmd K</span>
+                </button>
+            </div>
+            
+            <nav class="flex-1 px-3 space-y-1 overflow-y-auto custom-scrollbar pb-4">
+                <button onclick="switchView('dashboard')" id="nav-dashboard" class="w-full flex items-center px-3 py-2 hover:bg-white/5 rounded-lg transition font-medium text-sm text-gray-300">
+                    <i data-lucide="layout-dashboard" class="w-4 h-4 mr-3 text-blue-400"></i> Inicio
+                </button>
+                
+                <div class="pt-4 pb-1 px-3 flex items-center justify-between group">
+                    <p class="text-xs uppercase text-gray-500 font-semibold tracking-wider">Favoritos</p>
+                </div>
+                <div id="favorites-list" class="space-y-0.5 mb-2"></div>
+                
+                <div class="pt-4 pb-1 px-3 flex items-center justify-between group">
+                    <p class="text-xs uppercase text-gray-500 font-semibold tracking-wider">Categorías</p>
+                    <button onclick="toggleModal('subject-modal')" class="text-gray-500 hover:text-white transition"><i data-lucide="plus" class="w-4 h-4"></i></button>
+                </div>
+                <div id="subjects-list" class="space-y-0.5"></div>
+            </nav>
+
+            <div class="p-4 border-t border-gray-800 space-y-2 bg-[#1e1e24]">
+                <button onclick="toggleDarkMode()" class="w-full flex items-center px-3 py-2 text-sm text-gray-400 hover:text-white hover:bg-white/5 rounded-lg transition">
+                    <i data-lucide="moon" class="w-4 h-4 mr-3" id="dark-mode-icon"></i> Tema Visual
+                </button>
+                <button onclick="handleLogout()" class="w-full flex items-center px-3 py-2 text-sm text-red-400 hover:text-red-300 hover:bg-red-500/10 rounded-lg transition">
+                    <i data-lucide="log-out" class="w-4 h-4 mr-3"></i> Cerrar Sesión
+                </button>
+            </div>
+        </aside>
+
+        <!-- OVERLAY MÓVIL -->
+        <div id="mobile-overlay" onclick="toggleSidebar()" class="fixed inset-0 bg-black/50 z-20 hidden md:hidden"></div>
+
+        <!-- ÁREA CENTRAL -->
+        <main class="flex-1 flex flex-col relative bg-white dark:bg-gray-900 transition-colors duration-300 overflow-y-auto w-full h-full custom-scrollbar" id="main-scroll">
+            
+            <!-- VISTA 1: DASHBOARD -->
+            <div id="view-dashboard" class="max-w-7xl mx-auto w-full p-4 md:p-8 lg:p-12 animate-fade-in block">
+                <div class="flex items-center justify-between md:hidden mb-6 mt-2">
+                    <button onclick="toggleSidebar()" class="text-gray-800 dark:text-gray-200 p-2"><i data-lucide="menu" class="w-6 h-6"></i></button>
+                    <div class="w-8 h-8 rounded-full bg-blue-600 flex items-center justify-center text-white font-bold text-xs">JS</div>
+                </div>
+
+                <header class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
+                    <div><h2 class="text-3xl md:text-4xl font-extrabold text-gray-900 dark:text-white tracking-tight">Tu Espacio.</h2></div>
+                    <button onclick="createNewNote()" class="bg-blue-600 hover:bg-blue-700 text-white px-5 py-2.5 rounded-xl shadow-lg shadow-blue-500/30 transition-all duration-300 font-medium text-sm flex items-center justify-center gap-2 whitespace-nowrap">
+                        <i data-lucide="pen-line" class="w-4 h-4"></i> Crear Apunte
+                    </button>
+                </header>
+
+                <div class="flex gap-2 overflow-x-auto pb-4 mb-4 custom-scrollbar hide-scroll-mobile" id="category-filters">
+                    <button onclick="filterNotesBySubject('all')" class="px-4 py-1.5 rounded-full text-sm font-medium bg-gray-900 text-white dark:bg-white dark:text-gray-900 whitespace-nowrap transition filter-btn" id="filter-all">Todos</button>
+                </div>
+
+                <div id="notes-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6 pb-20"></div>
+            </div>
+
+            <!-- VISTA 2: EDITOR -->
+            <div id="view-editor" class="w-full hidden animate-fade-in relative pb-32 min-h-screen">
+                <div id="editor-topbar" class="sticky top-0 w-full bg-white/90 dark:bg-gray-900/90 backdrop-blur-md border-b border-gray-100 dark:border-gray-800 px-4 md:px-8 py-3 flex items-center justify-between z-10 transition-transform duration-300 transform translate-y-0">
+                    <div class="flex items-center gap-1 md:gap-2 text-sm text-gray-500 font-medium w-full md:w-auto">
+                        <button onclick="exitEditorSafely()" class="md:hidden p-2 text-gray-800 dark:text-gray-200"><i data-lucide="arrow-left" class="w-5 h-5"></i></button>
+                        <button onclick="exitEditorSafely()" class="hidden md:flex hover:text-gray-900 dark:hover:text-white transition items-center gap-1"><i data-lucide="home" class="w-4 h-4"></i></button>
+                        <span class="hidden md:inline">/</span>
+                        <select id="editor-subject-select" class="px-2 py-1.5 bg-gray-100 dark:bg-gray-800 dark:text-gray-300 rounded outline-none w-full md:w-auto text-xs md:text-sm appearance-none cursor-pointer" onchange="triggerAutosave()"></select>
+                    </div>
+                    
+                    <div class="flex items-center gap-1 md:gap-3 flex-shrink-0 ml-2">
+                        <span id="save-status" class="hidden md:flex text-xs text-gray-400 items-center gap-1"><i data-lucide="cloud-check" class="w-4 h-4"></i> Guardado</span>
+                        
+                        <!-- BOTÓN GUARDAR MANUAL -->
+                        <button onclick="saveNoteManual()" class="p-2 md:px-3 md:py-1.5 bg-blue-600 hover:bg-blue-700 text-white rounded-lg flex items-center justify-center gap-2 text-sm font-medium transition shadow-md" title="Guardar Cambios (Ctrl+S)">
+                            <i data-lucide="save" class="w-4 h-4"></i> <span class="hidden md:inline">Guardar</span>
+                        </button>
+                        
+                        <button onclick="exportToPDF()" class="p-2 md:px-3 md:py-1.5 bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-lg flex items-center justify-center gap-2 text-sm transition" title="Exportar PDF">
+                            <i data-lucide="download" class="w-4 h-4"></i> <span class="hidden md:inline font-medium">PDF</span>
+                        </button>
+                        <button onclick="toggleFocusMode()" class="p-2 md:px-3 md:py-1.5 bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-lg flex items-center justify-center gap-2 text-sm transition" title="Modo Zen">
+                            <i data-lucide="maximize" class="w-4 h-4" id="focus-icon"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="max-w-4xl mx-auto px-4 sm:px-8 md:px-12 relative mt-6 md:mt-12" id="pdf-content">
+                    <input type="text" id="editor-title" class="w-full text-4xl md:text-5xl font-extrabold text-gray-900 dark:text-white border-none outline-none bg-transparent placeholder-gray-300 dark:placeholder-gray-600 mb-8" placeholder="Título de la nota..." oninput="triggerAutosave()">
+                    <div class="text-[17px] md:text-lg text-gray-800 dark:text-gray-300 space-y-2 md:space-y-3" id="editor-blocks"></div>
+                </div>
+                
+                <button id="exit-zen-btn" onclick="toggleFocusMode()" class="fixed bottom-6 right-6 bg-gray-900/80 dark:bg-white/80 text-white dark:text-gray-900 p-3 rounded-full shadow-2xl backdrop-blur hidden z-50 transform hover:scale-110 transition">
+                    <i data-lucide="minimize" class="w-5 h-5"></i>
+                </button>
+            </div>
+        </main>
+    </div>
+
+    <!-- MODAL PERFIL -->
+    <div id="profile-modal" class="fixed inset-0 bg-gray-900/60 backdrop-blur-sm z-50 hidden flex items-center justify-center opacity-0 transition-opacity duration-200 px-4">
+        <div class="bg-white dark:bg-gray-800 w-full max-w-sm rounded-2xl shadow-2xl p-6 transform scale-95 transition-transform duration-200 text-center relative" id="profile-content">
+            <button onclick="toggleModal('profile-modal')" class="absolute top-4 right-4 text-gray-400 hover:text-gray-700 dark:hover:text-gray-300"><i data-lucide="x" class="w-5 h-5"></i></button>
+            <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-6">Tu Perfil</h3>
+            
+            <div class="relative w-24 h-24 mx-auto mb-6 group cursor-pointer" onclick="document.getElementById('avatar-upload').click()">
+                <img id="modal-avatar" src="" alt="" class="w-24 h-24 rounded-full object-cover border-4 border-gray-100 dark:border-gray-700 hidden shadow-md">
+                <div id="modal-avatar-fallback" class="w-24 h-24 rounded-full bg-gradient-to-tr from-blue-600 to-purple-600 flex items-center justify-center text-white font-bold text-3xl border-4 border-gray-100 dark:border-gray-700 shadow-md">JS</div>
+                <div class="absolute inset-0 bg-black/50 rounded-full flex flex-col items-center justify-center opacity-0 group-hover:opacity-100 transition text-white">
+                    <i data-lucide="camera" class="w-6 h-6 mb-1"></i><span class="text-[10px] uppercase font-bold">Cambiar</span>
+                </div>
+            </div>
+            <input type="file" id="avatar-upload" accept="image/*" class="hidden" onchange="handleAvatarUpload(event)">
+            
+            <div class="space-y-4 text-left">
+                <div>
+                    <label class="block text-xs font-semibold text-gray-500 uppercase mb-1">Nombre</label>
+                    <input type="text" id="profile-name" class="w-full bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg px-3 py-2 outline-none dark:text-white" oninput="updateProfileName()">
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL EDICIÓN DE IMAGEN (Con Recorte 4 Lados) -->
+    <div id="image-editor-modal" class="fixed inset-0 bg-black/90 backdrop-blur-md z-[60] hidden flex flex-col items-center justify-center opacity-0 transition-opacity duration-200">
+        <div class="w-full max-w-4xl p-4 flex flex-col h-full">
+            <div class="flex justify-between items-center mb-4 text-white">
+                <h3 class="text-lg font-bold">Ajustar e Recortar Imagen</h3>
+                <button onclick="closeImageEditor()" class="p-2 hover:bg-white/10 rounded-full transition"><i data-lucide="x" class="w-6 h-6"></i></button>
+            </div>
+            
+            <div class="flex-1 bg-black/50 rounded-xl border border-gray-800 flex items-center justify-center overflow-hidden relative" id="img-edit-container">
+                <div id="crop-wrapper" style="overflow: hidden; display: inline-block;">
+                    <img id="img-to-edit" src="" alt="Edición" class="max-w-full max-h-full object-contain transition-transform duration-200" style="transform: scale(1) rotate(0deg);">
+                </div>
+            </div>
+            
+            <div class="mt-4 bg-gray-900 rounded-xl p-4 flex flex-wrap items-center justify-center gap-4 sm:gap-6 border border-gray-800 w-full overflow-x-auto custom-scrollbar">
+                <div class="flex flex-col items-center min-w-[120px]">
+                    <label class="text-xs text-gray-400 mb-2 uppercase tracking-wide font-bold"><i data-lucide="maximize-2" class="w-3 h-3 inline mr-1"></i>Tamaño</label>
+                    <input type="range" id="img-scale-slider" min="50" max="150" value="100" class="w-full accent-blue-500" oninput="applyImageEdits()">
+                </div>
+                
+                <div class="w-px h-10 bg-gray-800 hidden sm:block"></div>
+                
+                <div class="flex flex-col items-center min-w-[100px]">
+                    <label class="text-xs text-gray-400 mb-2 uppercase tracking-wide font-bold"><i data-lucide="rotate-cw" class="w-3 h-3 inline mr-1"></i>Rotación</label>
+                    <div class="flex gap-2">
+                        <button onclick="rotateImage(-90)" class="p-1.5 bg-gray-800 hover:bg-gray-700 text-white rounded transition"><i data-lucide="rotate-ccw" class="w-4 h-4"></i></button>
+                        <button onclick="rotateImage(90)" class="p-1.5 bg-gray-800 hover:bg-gray-700 text-white rounded transition"><i data-lucide="rotate-cw" class="w-4 h-4"></i></button>
+                    </div>
+                </div>
+
+                <div class="w-px h-10 bg-gray-800 hidden sm:block"></div>
+
+                <div class="flex flex-col items-center min-w-[280px]">
+                     <label class="text-xs text-gray-400 mb-2 uppercase tracking-wide font-bold"><i data-lucide="crop" class="w-3 h-3 inline mr-1"></i>Recorte (Izq / Der / Arriba / Abajo)</label>
+                     <div class="grid grid-cols-2 gap-2 w-full text-[11px] text-gray-400">
+                         <div><span>Izq:</span><input type="range" id="img-crop-left-slider" min="0" max="80" value="0" class="w-full accent-green-500" oninput="applyImageEdits()"></div>
+                         <div><span>Der:</span><input type="range" id="img-crop-right-slider" min="0" max="80" value="0" class="w-full accent-green-500" oninput="applyImageEdits()"></div>
+                         <div><span>Arriba:</span><input type="range" id="img-crop-top-slider" min="0" max="80" value="0" class="w-full accent-green-500" oninput="applyImageEdits()"></div>
+                         <div><span>Abajo:</span><input type="range" id="img-crop-bottom-slider" min="0" max="80" value="0" class="w-full accent-green-500" oninput="applyImageEdits()"></div>
+                     </div>
+                </div>
+
+                <div class="w-px h-10 bg-gray-800 hidden sm:block"></div>
+                
+                <button onclick="saveImageEdits()" class="bg-blue-600 hover:bg-blue-700 text-white px-5 py-2 rounded-lg font-bold shadow-lg transition whitespace-nowrap ml-auto">Aplicar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MENÚ / Y PUNTITOS -->
+    <div id="slash-menu" class="hidden absolute bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 shadow-2xl rounded-xl w-48 sm:w-56 overflow-hidden z-50 opacity-0 transition-opacity duration-150 transform -translate-y-2">
+        <div class="px-3 py-2 text-[10px] font-bold text-gray-400 uppercase tracking-widest border-b border-gray-100 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50">Convertir en...</div>
+        <div class="p-1 max-h-48 overflow-y-auto custom-scrollbar">
+            <button onclick="convertActiveBlock('p')" class="w-full flex items-center px-3 py-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition text-left text-sm text-gray-700 dark:text-gray-300"><i data-lucide="type" class="w-4 h-4 mr-3 text-gray-400"></i>Texto</button>
+            <button onclick="convertActiveBlock('h1')" class="w-full flex items-center px-3 py-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition text-left text-sm text-gray-700 dark:text-gray-300"><i data-lucide="heading-1" class="w-4 h-4 mr-3 text-gray-400"></i>Título 1</button>
+            <button onclick="convertActiveBlock('h2')" class="w-full flex items-center px-3 py-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition text-left text-sm text-gray-700 dark:text-gray-300"><i data-lucide="heading-2" class="w-4 h-4 mr-3 text-gray-400"></i>Título 2</button>
+            <button onclick="convertActiveBlock('todo')" class="w-full flex items-center px-3 py-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition text-left text-sm text-gray-700 dark:text-gray-300"><i data-lucide="check-square" class="w-4 h-4 mr-3 text-gray-400"></i>Checklist</button>
+            <button onclick="convertActiveBlock('image')" class="w-full flex items-center px-3 py-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition text-left text-sm text-gray-700 dark:text-gray-300"><i data-lucide="image" class="w-4 h-4 mr-3 text-gray-400"></i>Imagen</button>
+            <button onclick="convertActiveBlock('youtube')" class="w-full flex items-center px-3 py-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition text-left text-sm text-gray-700 dark:text-gray-300"><i data-lucide="youtube" class="w-4 h-4 mr-3 text-red-500"></i>YouTube</button>
+        </div>
+    </div>
+
+    <div id="block-menu" class="hidden absolute bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 shadow-xl rounded-lg w-36 overflow-hidden z-50 opacity-0 transition-opacity duration-150">
+        <div class="p-1">
+            <button onclick="moveBlock(-1)" class="w-full flex items-center px-3 py-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-md transition text-sm text-gray-700 dark:text-gray-300"><i data-lucide="arrow-up" class="w-4 h-4 mr-2"></i> Subir</button>
+            <button onclick="moveBlock(1)" class="w-full flex items-center px-3 py-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-md transition text-sm text-gray-700 dark:text-gray-300"><i data-lucide="arrow-down" class="w-4 h-4 mr-2"></i> Bajar</button>
+            <div class="h-px bg-gray-100 dark:bg-gray-700 my-1"></div>
+            <button onclick="deleteActiveBlock()" class="w-full flex items-center px-3 py-2 hover:bg-red-50 dark:hover:bg-red-900/30 rounded-md transition text-sm text-red-600"><i data-lucide="trash-2" class="w-4 h-4 mr-2"></i> Eliminar</button>
+        </div>
+    </div>
+
+    <!-- MODAL BUSCADOR -->
+    <div id="search-modal" class="fixed inset-0 bg-gray-900/40 backdrop-blur-sm z-50 hidden flex items-start justify-center pt-16 md:pt-24 opacity-0 transition-opacity duration-200 px-4">
+        <div class="bg-white dark:bg-gray-800 w-full max-w-2xl rounded-2xl shadow-2xl overflow-hidden transform scale-95 transition-transform duration-200 flex flex-col max-h-[80vh]" id="search-content">
+            <div class="flex items-center border-b border-gray-100 dark:border-gray-700 px-4 py-3 shrink-0">
+                <i data-lucide="search" class="w-5 h-5 text-gray-400 mr-3"></i>
+                <input type="text" id="search-input" oninput="performSearch()" placeholder="Buscar notas..." class="w-full text-lg border-none outline-none bg-transparent placeholder-gray-400 text-gray-800 dark:text-white">
+                <button onclick="toggleModal('search-modal')" class="text-xs bg-gray-100 dark:bg-gray-700 text-gray-500 dark:text-gray-300 px-2 py-1 rounded">ESC</button>
+            </div>
+            <div class="p-2 overflow-y-auto custom-scrollbar flex-1" id="search-results"></div>
+        </div>
+    </div>
+
+    <!-- MODAL CATEGORÍA -->
+    <div id="subject-modal" class="fixed inset-0 bg-gray-900/40 backdrop-blur-sm z-50 hidden flex items-center justify-center opacity-0 transition-opacity duration-200 px-4">
+        <div class="bg-white dark:bg-gray-800 w-full max-w-md rounded-2xl shadow-2xl p-6 transform scale-95 transition-transform duration-200" id="subject-content">
+            <div class="flex justify-between items-center mb-6">
+                <h3 class="text-xl font-bold text-gray-900 dark:text-white">Nueva Categoría</h3>
+                <button onclick="toggleModal('subject-modal')" class="text-gray-400 hover:text-gray-700"><i data-lucide="x" class="w-5 h-5"></i></button>
+            </div>
+            <div class="space-y-4">
+                <input type="text" id="new-subject-name" placeholder="Ej. Sistemas Operativos" class="w-full bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg px-4 py-3 outline-none dark:text-white transition focus:border-blue-500">
+                <div>
+                    <label class="block text-xs font-semibold text-gray-500 uppercase mb-2">Color del tag</label>
+                    <div class="flex flex-wrap gap-3" id="color-picker">
+                        <button onclick="selectColor('bg-red-500')" class="color-btn w-8 h-8 rounded-full bg-red-500 ring-2 ring-offset-2 ring-transparent dark:ring-offset-gray-800"></button>
+                        <button onclick="selectColor('bg-blue-500')" class="color-btn w-8 h-8 rounded-full bg-blue-500 ring-2 ring-offset-2 ring-blue-500 dark:ring-offset-gray-800"></button>
+                        <button onclick="selectColor('bg-green-500')" class="color-btn w-8 h-8 rounded-full bg-green-500 ring-2 ring-offset-2 ring-transparent dark:ring-offset-gray-800"></button>
+                        <button onclick="selectColor('bg-purple-500')" class="color-btn w-8 h-8 rounded-full bg-purple-500 ring-2 ring-offset-2 ring-transparent dark:ring-offset-gray-800"></button>
+                        <button onclick="selectColor('bg-yellow-400')" class="color-btn w-8 h-8 rounded-full bg-yellow-400 ring-2 ring-offset-2 ring-transparent dark:ring-offset-gray-800"></button>
+                        <button onclick="selectColor('bg-pink-500')" class="color-btn w-8 h-8 rounded-full bg-pink-500 ring-2 ring-offset-2 ring-transparent dark:ring-offset-gray-800"></button>
+                    </div>
+                </div>
+            </div>
+            <div class="mt-8 flex justify-end gap-3">
+                <button onclick="createSubject()" class="w-full bg-blue-600 text-white rounded-lg py-3 font-medium shadow-md transition hover:bg-blue-700">Crear Categoría</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="toast-container" class="fixed bottom-6 right-6 z-[70] flex flex-col gap-3 pointer-events-none"></div>
+
+    <script src="app.js"></script>
+    
+    <div id="inline-toolbar" class="hidden absolute bg-gray-900 text-white rounded-lg shadow-xl px-2 py-1.5 z-40 flex items-center gap-1 transition-opacity duration-150 transform -translate-y-2">
+        <button onclick="formatText('bold')" class="p-1.5 hover:bg-gray-700 rounded transition"><i data-lucide="bold" class="w-4 h-4"></i></button>
+        <button onclick="formatText('italic')" class="p-1.5 hover:bg-gray-700 rounded transition"><i data-lucide="italic" class="w-4 h-4"></i></button>
+        <button onclick="formatText('underline')" class="p-1.5 hover:bg-gray-700 rounded transition"><i data-lucide="underline" class="w-4 h-4"></i></button>
+    </div>
+</body>
+</html>
